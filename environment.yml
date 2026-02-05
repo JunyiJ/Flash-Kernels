@@ -1,0 +1,19 @@
+name: flash-dev
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pytorch=2.10.0        # Latest early 2026 release
+  - pytorch-cuda=12.6     # Standard stable CUDA for 2026
+  - torchvision
+  - numpy
+  - pandas
+  - matplotlib
+  - ipykernel
+  - ninja                # Crucial for fast JIT kernel compilation
+  - pip:
+      - triton           # OpenAI Triton (Standard for LLM kernels)
+      - tabulate         # For pretty benchmarking results
