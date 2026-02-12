@@ -13,6 +13,7 @@ def matmul_kernel(
     stride_bk, stride_bn,
     stride_cm, stride_cn,
     BLOCK_SIZE_M: tl.constexpr, BLOCK_SIZE_N: tl.constexpr, BLOCK_SIZE_K: tl.constexpr,
+    GROUP_SIZE_M: tl.constexpr,
 ):
     """
     Implement a tiled Matrix Multiplication
@@ -71,6 +72,7 @@ def matmul(a, b):
         b.stride(0), b.stride(1),
         c.stride(0), c.stride(1),
         BLOCK_SIZE_M=128, BLOCK_SIZE_N=128, BLOCK_SIZE_K=32,
+        GROUP_SIZE_M=8,
     ) 
     return c
 
