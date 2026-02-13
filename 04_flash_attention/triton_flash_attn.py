@@ -51,6 +51,10 @@ def _flash_attn_fwd_kernel(
 
         # Compute Scores & Online softmax
         s = tl.dot(q, tl.trans(k)) * sm_scale
+        # Causal mask
+        if start_n + BLOCK_N > pid_m * BLOCK_M:
+            mask = offs_m[:, None] >= offs_n[None, :]
+            s = tl.where(mask, s, float"-inf")
         s = tl.where(n_mask[None, :], s, float("-inf"))
         m_ij = tl.max(s, axis=1)
         p = tl.exp(s - m_ij[:, None])
@@ -104,7 +108,7 @@ k = torch.randn((BATCH, HEADS, SEQ, DIM), device=DEVICE, dtype=torch.float16)
 v = torch.randn((BATCH, HEADS, SEQ, DIM), device=DEVICE, dtype=torch.float16)
 
 output_torch = torch.nn.functional.scaled_dot_product_attention(
-    q, k, v, is_causal=False, scale=SCALE
+    q, k, v, is_causal=True, scale=SCALE
 )
 
 output_triton = flash_attn_forward(q, k, v, SCALE)
