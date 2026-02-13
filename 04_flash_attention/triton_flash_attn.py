@@ -39,7 +39,7 @@ def _flash_attn_fwd_kernel(
     q = tl.load(q_ptrs, mask=q_mask, other=0.0)
 
     # Iterate over key and value blocks (along the sequence dimension)
-    for start_n in range(0, n_ctx, BLOCK_N):
+    for start_n in range(0, (pid_m + 1) * BLOCK_M, BLOCK_N):
         # Load K & V tiles
         offs_n = start_n + tl.arange(0, BLOCK_N)
         n_mask = offs_n < n_ctx
