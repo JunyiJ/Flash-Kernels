@@ -61,7 +61,7 @@ def _flash_attn_fwd_kernel(
         alpha = tl.exp(m_i - m_new)
         beta = tl.exp(m_ij - m_new)
 
-        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float16), v.to(tl.float16))
+        acc = acc * alpha[:, None] + beta * tl.dot(p.to(tl.float16), v.to(tl.float16))
         m_i = m_new
         l_i = alpha * l_i + beta * l_ij
 
