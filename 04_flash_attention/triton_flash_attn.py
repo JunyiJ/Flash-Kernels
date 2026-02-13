@@ -58,13 +58,18 @@ def _flash_attn_fwd_kernel(
             s = tl.where(mask, s, float("-inf"))
         s = tl.where(n_mask[None, :], s, float("-inf"))
         m_ij = tl.max(s, axis=1)
-        p = tl.exp(s - m_ij[:, None])
+        m_ij_safe = tl.where(m_ij == float("-inf"), 0.0, m_ij)
+        p = tl.exp(s - m_ij_safe[:, None])
         l_ij = tl.sum(p, axis=1)
 
         # Rescale and update accumulator
         m_new = tl.maximum(m_i, m_ij)
         alpha = tl.exp(m_i - m_new)
         beta = tl.exp(m_ij - m_new)
+
+        is_empty = m_new == float("-inf")
+        alpha = tl.where(is_empty, 0.0, alpha)
+        beta = tl.where(is_empty, 0.0, beta)
 
         acc = acc * alpha[:, None] + beta[:, None] * tl.dot(p.to(tl.float16), v.to(tl.float16))
         m_i = m_new
