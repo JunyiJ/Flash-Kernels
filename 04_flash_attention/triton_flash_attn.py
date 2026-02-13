@@ -54,7 +54,7 @@ def _flash_attn_fwd_kernel(
         # Causal mask
         if start_n + BLOCK_N > pid_m * BLOCK_M:
             mask = offs_m[:, None] >= offs_n[None, :]
-            s = tl.where(mask, s, float"-inf")
+            s = tl.where(mask, s, float"(-inf"))
         s = tl.where(n_mask[None, :], s, float("-inf"))
         m_ij = tl.max(s, axis=1)
         p = tl.exp(s - m_ij[:, None])
