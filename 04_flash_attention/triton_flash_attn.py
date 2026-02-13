@@ -39,7 +39,8 @@ def _flash_attn_fwd_kernel(
     q = tl.load(q_ptrs, mask=q_mask, other=0.0)
 
     # Iterate over key and value blocks (along the sequence dimension)
-    for start_n in range(0, (pid_m + 1) * BLOCK_M, BLOCK_N):
+    hi = tl.minimum((pid_m + 1) * BLOCK_M, n_ctx)
+    for start_n in range(0, hi, BLOCK_N):
         # Load K & V tiles
         offs_n = start_n + tl.arange(0, BLOCK_N)
         n_mask = offs_n < n_ctx
@@ -117,5 +118,3 @@ print(output_triton)
 print(f'The maximum difference between torch and triton is '
       f'{torch.max(torch.abs(output_torch - output_triton))}')
 print(torch.allclose(output_triton, output_torch, rtol=1e-2, atol=1e-2))
-
-
